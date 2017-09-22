@@ -33,8 +33,6 @@ class App extends Component {
     this.startRecording = this.startRecording.bind(this);
     this.stopRecording = this.stopRecording.bind(this);
     this.setTime = this.setTime.bind(this);
-    this.playAll = this.playAll.bind(this);
-    this.pauseAll = this.pauseAll.bind(this);
   }
 
   setTime(time) {
@@ -62,9 +60,7 @@ class App extends Component {
   startRecording(recorder) {
     if(this.state.duration === 0) recorder.start();
     else {
-      console.log('ELSEEEE');
       let timeLimit = this.state.duration*1000;
-      console.log(timeLimit);
       recorder.start()
       setTimeout(() => {
         this.stopRecording(recorder);
@@ -84,18 +80,11 @@ class App extends Component {
       var audioElem = document.getElementById(id);
       audioElem.src = URL.createObjectURL(blob);
       audioElem.loop = true;
-      if(this.state.duration === 0) this.setTime(audioElem.duration);
+      
+      audioElem.addEventListener('loadedmetadata', () => {
+        this.setTime(audioElem.duration);
+      })
     };
-  }
-
-  playAll() {
-    let loops = document.getElementsByClassName("loop");
-    loops.play();
-  }
-  
-  pauseAll() {
-    let loops = document.getElementsByClassName("loop");
-    loops.pause();
   }
 
   render() {
@@ -206,7 +195,23 @@ export default App;
 // }
 
 
+// playAll() {
+//   this.state.recorders.forEach(recorder => {
+//     let loops = document.getElementsByClassName("loop");
+//     for(var i=0; i<loops.length; loops++) {
+//       if(!loops[i].loop) loops[i].loop = true;
+//     }
+//   })
+// }
 
+// pauseAll() {
+//   this.state.recorders.forEach(recorder => {
+//     let loops = document.getElementsByClassName("loop");
+//     for(var i=0; i<loops.length; loops++) {
+//       if(loops[i].loop) loops[i].loop = false;
+//     }
+//   })
+// }
 
 // mediaRecorder.onstop = (evt) => {
 //   // Make blob out of our blobs, and open it.
