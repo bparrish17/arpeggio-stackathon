@@ -5,7 +5,11 @@
   "dependencies": {
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "react-scripts": "1.0.13"
+    "react-key-handler": "^1.0.0",
+    "react-scripts": "1.0.13",
+    "react-wave-stream": "^1.0.0",
+    "recorder-js": "^1.0.7",
+    "workerify": "^1.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
