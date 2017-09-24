@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
+const Tone = require('tone');
+const MonoSynth = require('tone').MonoSynth;
+let synth = new MonoSynth();
 
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var chunks = {
@@ -12,6 +15,23 @@ var chunks = {
 };
 var dest = audioCtx.createMediaStreamDestination();
 
+//create a synth and connect it to the master output (your speakers)
+let test = synth.toMaster();
+
+var drum = new Tone.MembraneSynth({
+  "pitchDecay" : 0.008,
+  "octaves" : 2,
+  "envelope" : {
+    "attack" : 0.0006,
+    "decay" : 0.5,
+    "sustain" : 0
+  }
+}).toMaster();
+
+// Tone.Transport.stop()
+
+//play a middle 'C' for the duration of an 8th note
+//test.triggerAttackRelease("C4", "8n");
 
 navigator.getUserMedia = navigator.getUserMedia ||
 navigator.webkitGetUserMedia ||
@@ -25,12 +45,18 @@ class App extends Component {
       recorders: [],
       current: -1,
       duration: 0,
-      countdown: 3
+      countdown: 3,
+      bpm: 100,
+      beatLength: 0,
+      beatsArray: [],
+      metronomeSet: false
     }
     this.addRecording = this.addRecording.bind(this);
     this.startRecording = this.startRecording.bind(this);
     this.stopRecording = this.stopRecording.bind(this);
     this.setTime = this.setTime.bind(this);
+    this.startMetronome = this.startMetronome.bind(this);
+    this.setBpm = this.setBpm.bind(this);
   }
 
   setTime(time) {
@@ -76,7 +102,40 @@ class App extends Component {
       }
   }
 
+  startMetronome(setDuration) {
+    let drumPart;
+
+    //SET METRONOME
+    //IF SETTING RECORD TIME LIMIT
+    if(setDuration) {
+      this.setState({metronomeSet: true});
+      let arr = [];
+      drumPart = new Tone.Sequence((time, pitch) => {
+        drum.triggerAttack(pitch, time, 0.5);
+        arr.push(time);
+        this.setState({beatsArray: arr});
+        this.setTime(arr[arr.length-1]-arr[0])
+        }, ["C4", "G3", "G3", "G3"], "4n").start(0);
+        drumPart.loop = 2;
+    }
+    //PLAY METRONOME
+    //IF JUST TESTING BPM
+    else {
+      drumPart = new Tone.Sequence((time, pitch) => {
+      drum.triggerAttack(pitch, time, 0.5);
+      }, ["C4", "G3", "G3", "G3"], "4n").start(0);
+    }
+    Tone.Transport.bpm.value = this.state.bpm;
+    Tone.Transport.start();
+  }
+
+  setBpm(event) {
+    let bpm = event.target.value;
+    this.setState({bpm: bpm})
+  }
+
   startRecording(recorder) {
+    //IN THE CASE THAT THIS WAS THE FIRST RECORDING AND NO BEAT WAS SET
     if(this.state.duration === 0) {
       let interval1 = setInterval(() => {
         this.setState({countdown: this.state.countdown-1})
@@ -87,6 +146,12 @@ class App extends Component {
       }, 1000)
     }
     else {
+      // IN THE CASE THAT THIS WAS EITHER A) FIRST RECORDING AND BEAT SET OR B) LATER RECORDING
+      // WHERE WE LEFT OFF -- 2 IFS HERE, ONE IF METRONOME SET
+      // IF NOT METRONOME SET, LET IT DO A 3,2,1? OR A BEAT COUNTDOWN?
+
+      // let intervalLength = this.state.duration/2;
+      // console.log('DURATION', intervalLength)
       let timeLimit = this.state.duration*1000;
       let interval2 = setInterval(() => {
         this.setState({countdown: this.state.countdown-1})
@@ -129,10 +194,10 @@ class App extends Component {
         </div>
         <div className="center container-fluid">
           <div id="break"></div>
-          <div className="col-xs-2"></div>
-            <div className="col-xs-8">
+          <div className="col-xs-1"></div>
+            <div id="col-holder" className="col-xs-10">
               <div id="arpeggio">
-                <text id="title"><strong>Arpegg.io</strong></text>
+                <text id="title"><i><strong>Arpegg.io</strong></i></text>
               </div>
               <div id="countdown-holder">
                 <text id="record-in">Record In</text>
@@ -143,7 +208,10 @@ class App extends Component {
                   }
                   </div>
                 <button type="button" className="add-recording btn btn-primary"onClick={this.addRecording}>Add New Loop</button>
-              <br />
+                <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(false)}>Play Metronome</button>
+                <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(true)}>Set Metronome</button>
+                <input id="bpm-input" onChange={this.setBpm} type="number" placeholder="enter bpm"></input>
+                <br />
               <br />
               {
                 recorders.map(recorder => {
@@ -170,7 +238,7 @@ class App extends Component {
               <button type="button" onClick={this.resetAll}>Reset All</button>
               </div>
             </div>
-          <div className="col-xs-2"></div>
+          <div className="col-xs-1"></div>
         </div>
       </div>
     );
