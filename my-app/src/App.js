@@ -108,6 +108,7 @@ class App extends Component {
     let drumPart;
     if(setDuration) {
       this.setState({metronomeSet: true});
+      this.setState({metronomePlaying: true});
       let arr = [];
       drumPart = new Tone.Sequence((time, pitch) => {
         drum.triggerAttack(pitch, time, 0.5);
@@ -117,13 +118,19 @@ class App extends Component {
         }, ["C4", "G3", "G3", "G3"], "4n").start(0);
         drumPart.loop = 2;
     }
-    else {
+    else {  
       drumPart = new Tone.Sequence((time, pitch) => {
       drum.triggerAttack(pitch, time, 0.5);
       }, ["C4", "G3", "G3", "G3"], "4n").start(0);
     }
     Tone.Transport.bpm.value = this.state.bpm;
-    Tone.Transport.start();
+    if(this.state.metronomePlaying) {
+      this.setState({metronomePlaying: false});
+      Tone.Transport.stop()
+    } else {
+      this.setState({metronomePlaying: true})
+      Tone.Transport.start();
+    }
   }
 
   setBpm(event) {
@@ -207,8 +214,8 @@ class App extends Component {
                   </div>
                 <button type="button" className="add-recording btn btn-primary"onClick={this.addRecording}>Add New Loop</button>
                 <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(false)}>Play Metronome</button>
-                {this.state.metronomeSet || chunks[0].length 
-                  ? <button type="button" className="add-recording btn btn-primary" disabled>Tempo Already Set</button>
+                {this.state.metronomeSet || chunks[0].length || this.state.metronomePlaying
+                  ? <button type="button" className="add-recording btn btn-primary" disabled>Can't Set Tempo</button>
                   : <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(true)}>Set Metronome</button>
                 }
                 <input id="bpm-input" onChange={this.setBpm} type="number" placeholder="enter bpm"></input>
