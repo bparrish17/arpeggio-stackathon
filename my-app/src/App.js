@@ -49,7 +49,8 @@ class App extends Component {
       bpm: 100,
       beatLength: 0,
       beatsArray: [],
-      metronomeSet: false
+      metronomeSet: false,
+      metronomePlaying: false
     }
     this.addRecording = this.addRecording.bind(this);
     this.startRecording = this.startRecording.bind(this);
@@ -85,7 +86,8 @@ class App extends Component {
   }
 
   addRecording() {
-    console.log('duration', this.state.duration);
+    console.log('COUNTDOWN', this.state.countdown)
+    console.log('DURATION', this.state.duration)
     if (navigator.mediaDevices) {
       console.log('getUserMedia supported.');
         navigator.getUserMedia({audio: true}, 
@@ -104,22 +106,17 @@ class App extends Component {
 
   startMetronome(setDuration) {
     let drumPart;
-
-    //SET METRONOME
-    //IF SETTING RECORD TIME LIMIT
     if(setDuration) {
       this.setState({metronomeSet: true});
       let arr = [];
       drumPart = new Tone.Sequence((time, pitch) => {
         drum.triggerAttack(pitch, time, 0.5);
         arr.push(time);
-        this.setState({beatsArray: arr});
+        this.setState({beatsArray: arr, countdown: arr[arr.length-1]-arr[0]});
         this.setTime(arr[arr.length-1]-arr[0])
         }, ["C4", "G3", "G3", "G3"], "4n").start(0);
         drumPart.loop = 2;
     }
-    //PLAY METRONOME
-    //IF JUST TESTING BPM
     else {
       drumPart = new Tone.Sequence((time, pitch) => {
       drum.triggerAttack(pitch, time, 0.5);
@@ -136,7 +133,7 @@ class App extends Component {
 
   startRecording(recorder) {
     //IN THE CASE THAT THIS WAS THE FIRST RECORDING AND NO BEAT WAS SET
-    if(this.state.duration === 0) {
+    if(this.state.duration <= 0) {
       let interval1 = setInterval(() => {
         this.setState({countdown: this.state.countdown-1})
         if(this.state.countdown === 0) {
@@ -146,28 +143,27 @@ class App extends Component {
       }, 1000)
     }
     else {
-      // IN THE CASE THAT THIS WAS EITHER A) FIRST RECORDING AND BEAT SET OR B) LATER RECORDING
-      // WHERE WE LEFT OFF -- 2 IFS HERE, ONE IF METRONOME SET
-      // IF NOT METRONOME SET, LET IT DO A 3,2,1? OR A BEAT COUNTDOWN?
-
-      // let intervalLength = this.state.duration/2;
-      // console.log('DURATION', intervalLength)
+      let interval2;
+      let timeInterval;
       let timeLimit = this.state.duration*1000;
-      let interval2 = setInterval(() => {
-        this.setState({countdown: this.state.countdown-1})
-        if(this.state.countdown === 0) {
+
+      this.state.metronomeSet ? timeInterval = this.state.duration/8 
+                              : timeInterval = 1
+      interval2 = setInterval(() => {
+        this.setState({countdown: this.state.countdown-timeInterval})
+        if(this.state.countdown <= 0) {
           recorder.start();
           clearInterval(interval2);
           setTimeout(() => {
             this.stopRecording(recorder);
           }, timeLimit)
         } 
-      }, 1000)
+      }, timeInterval*1000)
     }
   }
 
   stopRecording(recorder) {
-    this.setState({countdown: 3});
+    this.state.metronomeSet ? this.setState({countdown: this.state.duration + this.state.duration/8}) : this.setState({countdown: 3})
     let id = this.state.recorders.indexOf(recorder);
     recorder.stop();
     recorder.ondataavailable = (event) => {
@@ -179,9 +175,11 @@ class App extends Component {
       var audioElem = document.getElementById(id);
       audioElem.src = URL.createObjectURL(blob);
       audioElem.loop = true;
-      audioElem.addEventListener('loadedmetadata', () => {
-        this.setTime(audioElem.duration);
-      })
+      if(!this.state.metronomeSet) {
+        audioElem.addEventListener('loadedmetadata', () => {
+          this.setTime(audioElem.duration);
+        })
+      }
     };
   }
 
@@ -202,14 +200,17 @@ class App extends Component {
               <div id="countdown-holder">
                 <text id="record-in">Record In</text>
                   <div>
-                  {this.state.countdown === 0 
+                  {this.state.countdown <= 0 
                   ? <text className="three"><strong>Go</strong></text>
-                  : <text className="three"><strong>{this.state.countdown}</strong></text>
+                  : <text className="three"><strong>{this.state.countdown.toString().slice(0, 4)}</strong></text>
                   }
                   </div>
                 <button type="button" className="add-recording btn btn-primary"onClick={this.addRecording}>Add New Loop</button>
                 <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(false)}>Play Metronome</button>
-                <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(true)}>Set Metronome</button>
+                {this.state.metronomeSet || chunks[0].length 
+                  ? <button type="button" className="add-recording btn btn-primary" disabled>Tempo Already Set</button>
+                  : <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(true)}>Set Metronome</button>
+                }
                 <input id="bpm-input" onChange={this.setBpm} type="number" placeholder="enter bpm"></input>
                 <br />
               <br />
@@ -283,6 +284,10 @@ export default App;
 //   document.querySelector("audio").src = URL.createObjectURL(blob);
 //   document.querySelector("audio").loop = true;
 // };
+
+        // console.log("METRONOME COUNT/STATE DURATION", metronomeCount);
+        // console.log('BEAT COUNTDOWN', beatCountdown);
+        // console.log("STATE COUNTDOWN", this.state.countdown);
 
 // <button type="button" onClick={this.addRecording}>Click Add A New Recorder</button>
 // <button type="button" onClick={() => this.startRecording(this.state.recorders[1])}>Record 2</button>
