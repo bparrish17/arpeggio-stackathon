@@ -156,6 +156,7 @@ class App extends Component {
 
       this.state.metronomeSet ? timeInterval = this.state.duration/8 
                               : timeInterval = 1
+      this.setState({countdown: this.state.countdown + timeInterval})
       interval2 = setInterval(() => {
         this.setState({countdown: this.state.countdown-timeInterval})
         if(this.state.countdown <= 0) {
