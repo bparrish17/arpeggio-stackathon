@@ -140,6 +140,12 @@ class App extends Component {
 
   startRecording(recorder) {
     //IN THE CASE THAT THIS WAS THE FIRST RECORDING AND NO BEAT WAS SET
+    //CASES: 
+    // 1) First recording, no metronomeSet: 3, 2, 1 countdown
+    // 2) First recording, metronomeSet: metronome countdown
+    // 3) Second --> no timer
+
+    
     if(this.state.duration <= 0) {
       let interval1 = setInterval(() => {
         this.setState({countdown: this.state.countdown-1})
@@ -156,7 +162,6 @@ class App extends Component {
 
       this.state.metronomeSet ? timeInterval = this.state.duration/8 
                               : timeInterval = 1
-      this.setState({countdown: this.state.countdown + timeInterval})
       interval2 = setInterval(() => {
         this.setState({countdown: this.state.countdown-timeInterval})
         if(this.state.countdown <= 0) {
@@ -194,10 +199,7 @@ class App extends Component {
   render() {
     let recorders = this.state.recorders;
     return (
-      <div>
-        <div id="img-holder">
-          <img id="img" src='http://cdn.pastemagazine.com/www/system/images/photo_albums/aditlo-grace-potter/large/photo_25322_0-37.jpg?1384968217' />
-        </div>
+      <div id="page">
         <div className="center container-fluid">
           <div id="break"></div>
           <div className="col-xs-1"></div>

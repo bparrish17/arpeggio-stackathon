@@ -2,6 +2,18 @@
   text-align: center;
 }
 
+#root {
+  background-image: url("two.jpg");
+  
+      /* Full height */
+      height: 750px; 
+  
+      /* Center and scale the image nicely */
+      background-position: center;
+      background-repeat: repeat-y;
+      background-size: cover;
+}
+
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 80px;
@@ -29,7 +41,7 @@
 }
 
 #col-holder {
-  background-color: #b3b3b3;
+  background-color: #d9d9d9;
   padding-top: 20px;
   padding-right: 20px;
   padding-left: 20px;
