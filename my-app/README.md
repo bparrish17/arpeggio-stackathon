@@ -1,4 +1,6 @@
 
+# Welcome to Arpegg.io!
+
 Arpegg.io is an in-browser loop pedal for recording drum beats, chord progressions, and harmonies and stacking them. Just hit 'add recording' and set the metronome for a two measure countdown. For free-flow recordings there's no need to set the metronome, you'll get a 3, 2, 1 count-in. The app will sync up your recordings to ensure they all play in sync and you can focus on creating great music!
 
  This app has not yet been deployed but can be run locally and viewed on localhost:3000.
@@ -27,6 +29,6 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 
 
-# Credits
+## Credits
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
