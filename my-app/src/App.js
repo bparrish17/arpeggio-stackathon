@@ -259,6 +259,27 @@ class App extends Component {
 export default App;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // onMouseUp={() => this.endNote(node)}
     // let gainNode = audioCtx.createGain();
     // gainNode.connect(audioCtx.destination);
