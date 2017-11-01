@@ -216,7 +216,7 @@ class App extends Component {
                 <button type="button" className="add-recording btn btn-primary"onClick={this.addRecording}>Add New Loop</button>
                 <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(false)}>Play Metronome</button>
                 {this.state.metronomeSet || chunks[0].length || this.state.metronomePlaying
-                  ? <button type="button" className="add-recording btn btn-primary" disabled>Can't Set Tempo</button>
+                  ? <button type="button" className="add-recording btn btn-primary" disabled>Cannot Set Tempo</button>
                   : <button type="button" className="add-recording btn btn-primary"onClick={(event) => this.startMetronome(true)}>Set Metronome</button>
                 }
                 <input id="bpm-input" onChange={this.setBpm} type="number" placeholder="enter bpm"></input>
